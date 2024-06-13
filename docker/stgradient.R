@@ -24,8 +24,12 @@ option_list <- list(
         help='Normalization method of `log` or `sct`'
     ),
     make_option(
-        c('-k', '--kclusters'),
-        help="Number of clusters or `dtc` for auto clusters"
+        c('-t', '--topgenes'),
+        help='Number of top genes to consider'
+    ),
+    make_option(
+        c('-d', '--distancesummary'),
+        help='Distance summary metric to use: min or avg'
     ),
     make_option(
         c('-o','--output_file_prefix'),
@@ -60,22 +64,6 @@ if (is.null(opt$normalization)){
     quit(status=1)
 }
 
-# we can accept an integer or 'automatic' as an argument to STclust below.
-# HOWEVER, an integer represented as a string 
-if(tolower(opt$kclusters) == 'automatic'){
-    cluster_k <- 'dtc'
-} else {
-    # if here, the argument was not equal to dtc. Can now either be 
-    # a number (represented as a string variable) OR an invalid string
-    # which cannot be cast as an integer
-    as_number <- as.numeric(opt$kclusters)
-    if (is.na(as_number)){
-        message('The -k/--kclusters option must be an integer or "dtc" for automatic selection.')
-        quit(status=1)
-    } else {
-        cluster_k <- as.integer(as_number)
-    }
-}
 
 # change the working directory to co-locate with the counts file:
 working_dir <- dirname(opt$input_file)
@@ -91,24 +79,42 @@ spat <- spat_list$spat
 # Transform the data
 spat <- transform_data(spat, method=norm_scheme)
 
-# Temporary inclusion of STclust for prototyping
-# Remove when we pass in the features
-spat_clust <- stClust(spat)
+# Create a pass through cluster vector
+
+###
+# ToDo: parser of opt@samples to make a vector
+###
+
+# Create a pass through of selected barcodes (single cluster) to background pool
+clusts <- rep(
+    2, 
+    length(spat@spatial_meta[[opt@sample_name]]$libname)
+)
+clusts[
+    ref_samples %in% spat@spatial_meta[[opt@sample_name]]$libname
+] <- 1
 
 # Assign passed clusters into object
-# ToDo: replace spat_clust reference with passed cluster vector created
-#   from opt inputs
-spat@spatial_meta[[opt@sample_name]]$stclust_pass <- spat_clust@spatial_meta$mmr$stclust_spw0.025_dsplFalse
+spat@spatial_meta[[opt@sample_name]]$stclust_pass <- clusts
 
 # Run STgradient
 # We can have cores as a param for parallelization "cores = n"
 # We can have as input "distsumm = min or avg"
-spat <- STgradient(
+grad_tib <- STgradient(
     spat,
     topgenes = opt$topgenenum,
     annot = "stclust_pass",
-    ref = opt$refclust,
+    ref = 1,
     samples = c(opt@sample_name),
     distsumm = "min"
     robust = T
+)
+
+# Write to file
+write.table(
+    grad_tib,
+    opt@output_file_prefix,
+    sep="\t",
+    quote=F,
+    row.names=F
 )
