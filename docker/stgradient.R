@@ -20,6 +20,10 @@ option_list <- list(
         help='Sample name'
     ),
     make_option(
+        c('-b', '--barcodes'),
+        help='barcodes in selected reference cluster'
+    ),
+    make_option(
         c('-n', '--normalization'),
         help='Normalization method of `log` or `sct`'
     ),
