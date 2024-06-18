@@ -1,0 +1,88 @@
+{
+    "name": "spatialGE Spatial Gradient Testing (STgradient)", 
+    "description": "Calculates Spearman's coefficients to detect genes showing expression spatial gradients using the spatialGE toolkit.", 
+    "inputs": {
+        "raw_counts": {
+            "description": "The input raw count matrix. Must be an integer-based table.", 
+            "name": "Count matrix:", 
+            "required": true, 
+            "converter": "api.converters.data_resource.LocalDockerSingleVariableDataResourceConverter",
+            "spec": {
+                "attribute_type": "VariableDataResource", 
+                "resource_types": ["I_MTX", "RNASEQ_COUNT_MTX"], 
+                "many": false
+            }
+        },
+        "coords_metadata": {
+            "description": "The coordinate metadata. This describes the physical location for each of the sampled points. The first column has the barcode values which should match the columns of the expression matrix. Columns 2 and 3 have the horizontal (x) and vertical (y) positions.", 
+            "name": "Coordinate metadata:", 
+            "required": true, 
+            "converter": "api.converters.data_resource.LocalDockerSingleVariableDataResourceConverter",
+            "spec": {
+                "attribute_type": "DataResource", 
+                "resource_type": "ANN", 
+                "many": false
+            }
+        },  
+        "sample_name": {
+            "description": "The name of the sample", 
+            "name": "Sample name:", 
+            "required": true, 
+            "converter": "api.converters.basic_attributes.StringConverter",
+            "spec": {
+                "attribute_type": "String"
+            }
+        },
+        "normalization_method": {
+            "description": "We provide log or SCTransform (Seurat) based normalization. For more details on each, see the corresponding publications", 
+            "name": "Normalization method:", 
+            "required": true, 
+            "converter": "api.converters.basic_attributes.StringConverter",
+            "spec": {
+                "attribute_type": "OptionString",
+                "options": ["log","SCTransform"]
+            }
+        },
+        "distance_summary": {
+            "description": "The distance summary metric to use in correlations", 
+            "name": "Distance summary metric:", 
+            "required": true, 
+            "converter": "api.converters.basic_attributes.UnrestrictedStringConverter",
+            "spec": {
+                "attribute_type": "OptionString",
+                "options": ["Minimum", "Average"]
+            }
+        },
+        "barcodes": {
+            "description": "The barcodes comprising the reference cluster.", 
+            "name": "Reference cluster:", 
+            "required": true, 
+            "converter": "api.converters.element_set.FeatureSetCsvConverter",
+            "spec": {
+                "attribute_type": "FeatureSet"
+            }
+        },
+        "num_genes": {
+            "description": "The number of high-variance genes to be tested.", 
+            "name": "Number of genes to test:", 
+            "required": true, 
+            "converter": "api.converters.basic_attributes.IntegerConverter",
+            "spec": {
+                "attribute_type": "PositiveInteger"
+            }
+        }
+    }, 
+    "outputs": {
+        "STgradient_results": {
+            "required": true,
+            "converter": "api.converters.data_resource.LocalDockerSingleDataResourceConverter",
+            "spec": {
+                "attribute_type": "DataResource", 
+                "resource_type": "FT",
+                "many": false
+            }
+        }
+    }, 
+    "mode": "local_docker",
+    "workspace_operation": true
+}

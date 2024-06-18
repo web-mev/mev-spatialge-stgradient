@@ -34,17 +34,12 @@ option_list <- list(
     make_option(
         c('-d', '--distancesummary'),
         help='Distance summary metric to use: min or avg'
-    ),
-    make_option(
-        c('-o','--output_file_prefix'),
-        help='The prefix for the output file'
     )
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
 
 # Check that the file was provided:
-# Checks are incomplete
 if (is.null(opt$input_file)){
     message('Need to provide a count matrix with the -f/--input_file arg.')
     quit(status=1)
@@ -68,6 +63,27 @@ if (is.null(opt$normalization)){
     quit(status=1)
 }
 
+# check distance summary is valid
+if (is.null(opt$distancesummary)){
+    message('Need to provide a test statistic with the -d/--distancesummary arg.')
+    quit(status=1)
+} else if(opt$distancesummary == "Minimum"){
+    distancesummary <- 'min'
+} else if(opt$distancesummary == "Average"){
+    distancesummary <- 'avg'
+} else {
+    message("We only accept `Minimum` or `Average` for the distance summary metric.")
+    quit(status=1)
+}
+
+tg_as_number <- as.numeric(opt$topgenes)
+if (is.na(tg_as_number)){
+    message('The -t/--topgenes option must be an integer.')
+    quit(status=1)
+} else {
+    n_topgenes <- as.integer(tg_as_number)
+}
+
 
 # change the working directory to co-locate with the counts file:
 working_dir <- dirname(opt$input_file)
@@ -77,25 +93,19 @@ setwd(working_dir)
 spat_list <- prep_stlist(opt$input_file, opt$coordinates_file, opt$sample_name)
 
 # unpack:
-colname_mapping <- spat_list$colname_mapping
 spat <- spat_list$spat
 
 # Transform the data
 spat <- transform_data(spat, method=norm_scheme)
 
-# Create a pass through cluster vector
-
-###
-# ToDo: parser of opt@samples to make a vector
-###
-
 # Create a pass through of selected barcodes (single cluster) to background pool
+ref_barcodes <- strsplit(opt$barcodes, ',')[[1]]
 clusts <- rep(
     2, 
     length(spat@spatial_meta[[opt@sample_name]]$libname)
 )
 clusts[
-    ref_samples %in% spat@spatial_meta[[opt@sample_name]]$libname
+    ref_barcodes %in% spat@spatial_meta[[opt@sample_name]]$libname
 ] <- 1
 
 # Assign passed clusters into object
@@ -106,19 +116,23 @@ spat@spatial_meta[[opt@sample_name]]$stclust_pass <- clusts
 # We can have as input "distsumm = min or avg"
 grad_tib <- STgradient(
     spat,
-    topgenes = opt$topgenenum,
+    topgenes = n_topgenes,
     annot = "stclust_pass",
     ref = 1,
     samples = c(opt@sample_name),
-    distsumm = "min"
+    distsumm = distancesummary,
     robust = T
 )
 
 # Write to file
+output_filename <- paste(working_dir, 'stgradient_output.tsv', sep='/')
 write.table(
     grad_tib,
-    opt@output_file_prefix,
+    output_filename,
     sep="\t",
     quote=F,
     row.names=F
 )
+json_str = paste0('{"STgradient_results":"', output_filename, '"}')
+output_json <- paste(working_dir, 'outputs.json', sep='/')
+write(json_str, output_json)
