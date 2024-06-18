@@ -57,9 +57,9 @@
             "description": "The barcodes comprising the reference cluster.", 
             "name": "Reference cluster:", 
             "required": true, 
-            "converter": "api.converters.element_set.FeatureSetCsvConverter",
+            "converter": "api.converters.element_set.ObservationSetCsvConverter",
             "spec": {
-                "attribute_type": "FeatureSet"
+                "attribute_type": "ObservationSet"
             }
         },
         "num_genes": {
