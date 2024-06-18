@@ -102,14 +102,14 @@ spat <- transform_data(spat, method=norm_scheme)
 ref_barcodes <- strsplit(opt$barcodes, ',')[[1]]
 clusts <- rep(
     2, 
-    length(spat@spatial_meta[[opt@sample_name]]$libname)
+    length(spat@spatial_meta[[opt$sample_name]]$libname)
 )
 clusts[
-    ref_barcodes %in% spat@spatial_meta[[opt@sample_name]]$libname
+    ref_barcodes %in% spat@spatial_meta[[opt$sample_name]]$libname
 ] <- 1
 
 # Assign passed clusters into object
-spat@spatial_meta[[opt@sample_name]]$stclust_pass <- clusts
+spat@spatial_meta[[opt$sample_name]]$stclust_pass <- clusts
 
 # Run STgradient
 # We can have cores as a param for parallelization "cores = n"
@@ -119,7 +119,7 @@ grad_tib <- STgradient(
     topgenes = n_topgenes,
     annot = "stclust_pass",
     ref = 1,
-    samples = c(opt@sample_name),
+    samples = c(opt$sample_name),
     distsumm = distancesummary,
     robust = F
 )
