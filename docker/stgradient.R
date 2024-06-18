@@ -99,13 +99,13 @@ spat <- spat_list$spat
 spat <- transform_data(spat, method=norm_scheme)
 
 # Create a pass through of selected barcodes (single cluster) to background pool
-ref_barcodes <- strsplit(opt$barcodes, ',')[[1]]
+ref_barcodes <- make.names(strsplit(opt$barcodes, ',')[[1]])
 clusts <- rep(
     2, 
-    length(spat@spatial_meta[[opt$sample_name]]$libname)
+    dim(spat@spatial_meta[[opt$sample_name]])[1]
 )
 clusts[
-    ref_barcodes %in% spat@spatial_meta[[opt$sample_name]]$libname
+    spat@spatial_meta[[opt$sample_name]]$libname %in% ref_barcodes
 ] <- 1
 
 # Assign passed clusters into object
@@ -121,13 +121,15 @@ grad_tib <- STgradient(
     ref = 1,
     samples = c(opt$sample_name),
     distsumm = distancesummary,
-    robust = F
+    robust = F,
+    cores=2
 )
 
 # Write to file
 output_filename <- paste(working_dir, 'stgradient_output.tsv', sep='/')
+keep_cols <- c('gene','avg_lm_coef','avg_lm_pval','avg_spearman_r','avg_spearman_r_pval','avg_spearman_r_pval_adj')
 write.table(
-    grad_tib,
+    grad_tib[[opt$sample_name]][keep_cols],
     output_filename,
     sep="\t",
     quote=F,
