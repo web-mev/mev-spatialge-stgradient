@@ -121,7 +121,7 @@ grad_tib <- STgradient(
     ref = 1,
     samples = c(opt@sample_name),
     distsumm = distancesummary,
-    robust = T
+    robust = F
 )
 
 # Write to file
