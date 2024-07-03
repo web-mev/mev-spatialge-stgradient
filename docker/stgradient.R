@@ -128,8 +128,15 @@ grad_tib <- STgradient(
 # Write to file
 output_filename <- paste(working_dir, 'stgradient_output.tsv', sep='/')
 keep_cols <- c('gene','avg_lm_coef','avg_lm_pval','avg_spearman_r','avg_spearman_r_pval','avg_spearman_r_pval_adj')
+output_table <- grad_tib[[opt$sample_name]][keep_cols]
+
+if(is.null(output_table)){
+    message('The output table was empty given the inputs provided. This can happen if the cluster selections and input data are such that a result cannot be calculated.')
+    quit(status=1)
+}
+
 write.table(
-    grad_tib[[opt$sample_name]][keep_cols],
+    output_table,
     output_filename,
     sep="\t",
     quote=F,
