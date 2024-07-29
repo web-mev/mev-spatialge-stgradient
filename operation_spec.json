@@ -70,6 +70,24 @@
             "spec": {
                 "attribute_type": "PositiveInteger"
             }
+        },
+        "xpos_col": {
+            "description": "The column header identifying the x/horizontal position in the coordinate metadata file.", 
+            "name": "x-position column:", 
+            "required": true, 
+            "converter": "api.converters.basic_attributes.StringConverter",
+            "spec": {
+                "attribute_type": "String"
+            }
+        },
+        "ypos_col": {
+            "description": "The column header identifying the y/vertical position in the coordinate metadata file.", 
+            "name": "y-position column:", 
+            "required": true, 
+            "converter": "api.converters.basic_attributes.StringConverter",
+            "spec": {
+                "attribute_type": "String"
+            }
         }
     }, 
     "outputs": {

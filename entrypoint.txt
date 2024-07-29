@@ -1,1 +1,1 @@
-Rscript /usr/local/bin/stgradient.R -f {{raw_counts}} -c {{coords_metadata}} -s {{sample_name}} -n {{normalization_method}} -d {{distance_summary}} -t {{num_genes}} -b "{{barcodes}}"
+Rscript /usr/local/bin/stgradient.R -f {{raw_counts}} -c {{coords_metadata}} -s {{sample_name}} -n {{normalization_method}} -d {{distance_summary}} -t {{num_genes}} -b "{{barcodes}}"  -x {{xpos_col}} -y {{ypos_col}}
